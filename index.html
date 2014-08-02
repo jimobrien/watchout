@@ -14,19 +14,126 @@
   <script src="src/js/Watchout.js"></script>
   <script src="src/js/Player.js"></script>
   <script>
-    var OPTIONS = {};
+    var gameOptions = {};
+    gameOptions.width = window.innerWidth * 0.8;
+    gameOptions.height = window.innerHeight * 0.8;
+    gameOptions.padding = 20;
+    gameOptions.enemies = 30;
 
-    OPTIONS.width = window.innerWidth * 0.8;
-    OPTIONS.height = window.innerHeight * 0.8;
-    OPTIONS.padding = 20;
-    OPTIONS.enemies = 30;
+    var gameStats = {};
+    gameStats.score = 0;
+    gameStats.bestScore = 0;
+
+    var axes = {};
+    axes.x = d3.scale.linear().domain([0,100]).range([0,gameOptions.width]);
+    axes.y = d3.scale.linear().domain([0,100]).range([0,gameOptions.height]);
 
     var gameBoard = d3.select('.container').append('svg:svg')
-                    .attr('width', OPTIONS.width)
-                    .attr('height', OPTIONS.height);
+                    .attr('width', gameOptions.width)
+                    .attr('height', gameOptions.height);
 
-    var wo = new Watchout();
+    var updateScore = function () {
+      d3.select('#current-score').text(gameStats.score.toString());
+    };
 
-    //wo.play();
+    var updateBestScore = function () {
+      gameStats.bestScore = Math.max(gameStats.bestScore, gameStats.score);
+      d3.select('#best-score').text(gameStats.bestScore.toString());
+    };
+
+    var players = [];
+    players.push(new Player(gameOptions).render(gameBoard));
+    players.push(new Player(gameOptions).render(gameBoard));
+
+
+    var createEnemies = function () {
+      var enemies = [];
+      for (var i = 0; i < gameOptions.enemies; i++) {
+        enemies.push({id:i, x:Math.random()*100, y:Math.random()*100});
+      }
+      return enemies;
+    };
+      
+    var render = function(enemy_data) {
+      var enemies = gameBoard.selectAll('circle.enemy')
+                             .data(enemy_data, function(d) { return d.id; });
+      enemies.enter()
+             .append('svg:circle')
+               .attr('class', 'enemy')
+               .attr('cx', function(enemy){ return axes.x(enemy.x);})
+               .attr('cy', function(enemy){ return axes.y(enemy.y);})
+               .attr('r', 0);
+
+      enemies.exit().remove();
+
+      var checkCollision = function(enemy, collidedCallback) {
+        for (var i = 0; i < players.length; i++) {
+          var radiusSum = parseFloat(enemy.attr('r')) + players[i].r;
+          var xDiff = parseFloat(enemy.attr('cx')) - players[i].x;
+          var yDiff = parseFloat(enemy.attr('cy')) - players[i].y;
+          var separation = Math.sqrt(Math.pow(xDiff, 2) + Math.pow(yDiff, 2));
+
+          if  (separation < radiusSum)
+            collidedCallback(players[i], enemy);
+        }
+      };
+
+      var onCollision = function () {
+        updateBestScore();
+        gameStats.score = 0;
+        updateScore();
+      };
+
+      var tweenWithCollisionDetection = function (endData)  {
+        var enemy = d3.select(this);
+        var startPos = {};
+        var endPos = {};
+
+        startPos.x = parseFloat(enemy.attr('cx'));
+        startPos.y = parseFloat(enemy.attr('cy'));
+
+        endPos.x = axes.x(endData.x);
+        endPos.y = axes.y(endData.y);
+
+        return function () {
+          var enemyNextPos = {};
+
+          checkCollision(enemy, onCollision);
+          
+          enemyNextPos.x = startPos.x + (endPos.x - startPos.x) * t;
+          enemyNextPos.y = startPos.y + (endPos.y - startPos.y) * t;
+
+          enemy.attr('cx', enemyNextPos.x)
+               .attr('cy', enemyNextPos.y);
+        };
+      };
+        
+      enemies.transition()
+               .duration(500)
+               .attr('r', 10)
+             .transition()
+               .duration(2000)
+               //.tween('custom', tweenWithCollisionDetection);
+    };
+
+
+    var play = function () {
+      var gameTurn = function () {
+        var newEnemyPositions = createEnemies();
+        render(newEnemyPositions);
+      };
+
+      var increaseScore = function () {
+        gameStats.score += 1;
+        updateScore();
+      };
+
+      gameTurn();
+      setInterval(gameTurn, 2000);
+      setInterval(increaseScore, 50);
+    };
+
+    play();
+          
   </script>
 </html>

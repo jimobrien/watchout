@@ -15,8 +15,8 @@ Player.prototype.render = function(node) {
                .attr('d', self._path)
                .attr('fill', self._fill);
   this._transform = {};
-  this._transform.x = this.options.width * 0.5;
-  this._transform.y = this.options.height * 0.5;
+  this._transform.x = this.options.width * 0.6;
+  this._transform.y = this.options.height * 0.6;
 
   this.setupDragging();
 };
@@ -57,12 +57,12 @@ Player.prototype.transform = function(opts) {
   var translate = 'translate({X},{Y})';
   var transformstr;
 
-  this.setX(options.x || this._x);
-  this.setY(options.y || this._y);
+  this.setX(opts.x || this._x);
+  this.setY(opts.y || this._y);
 
   x = this.getX();
   y = this.getY();
-  this._angle = options.angle || this._angle;
+  this._angle = opts.angle || this._angle;
 
   transformstr = rotate.replace('{ANGLE}', this._angle)
                        .replace('{X}', x)
@@ -71,6 +71,7 @@ Player.prototype.transform = function(opts) {
   transformstr += ' ' + translate.replace('{X}', x)
                            .replace('{Y}', y);
 
+  console.log(transformstr);
   this._el.attr('transform', transformstr);
 };
 
@@ -80,9 +81,10 @@ Player.prototype.moveAbsolute = function(x, y) {
 };
 
 Player.prototype.moveRelative = function(dx, dy) {
-    this._transform.x = this.getX() + dx;
-    this._transform.y = this.getY() + dy;
-    this._angle = 360 * (Math.atan2(dy,dx)/(Math.PI*2));
+  this._transform.x = this.getX() + dx;
+  this._transform.y = this.getY() + dy;
+  this._angle = 360 * (Math.atan2(dy,dx)/(Math.PI*2));
+  this.transform({x: this._transform.x, y: this._transform.y, angle: this._angle});
 };
 
 Player.prototype.setupDragging = function() {
@@ -97,71 +99,3 @@ Player.prototype.setupDragging = function() {
 
   this._el.call(drag);
 };
-
-//   render: (to) =>
-//     @el = to.append('svg:path')
-//             .attr('d', @path)
-//             .attr('fill', @fill)
-//     @transform
-//       x: @gameOptions.width * 0.5
-//       y: @gameOptions.height * 0.5
-
-//     @setupDragging()
-//     this
-// ¶
-// Getters and setters to ensure the player stays within the game boundary
-
-//   getX: => @x
-//   setX: (x) =>
-//     minX = @gameOptions.padding
-//     maxX = @gameOptions.width - @gameOptions.padding
-//     x = minX if x <= minX
-//     x = maxX if x >= maxX
-//     @x = x
-
-//   getY: => @y
-//   setY: (y) =>
-//     minY = @gameOptions.padding
-//     maxY = @gameOptions.height - @gameOptions.padding
-//     y = minY if y <= minY
-//     y = maxY if y >= maxY
-//     @y = y
-// ¶
-// Since the player is an svg:path, we have to move/rotate him using transform. This method just lets us set any/all of the attributes and the rest will be taken from his internal state
-
-//   transform: (opts) =>
-//     @angle = opts.angle || @angle
-//     @setX opts.x || @x
-//     @setY opts.y || @y
-
-//     @el.attr 'transform',
-//       "rotate(#{@angle},#{@getX()},#{@getY()}) "+
-//       "translate(#{@getX()},#{@getY()})"
-// ¶
-// Moves the player to an absolute position on the gameboard
-
-//   moveAbsolute: (x,y) =>
-//     @transform
-//       x:x
-//       y:y
-// ¶
-// Moves the player to a relative position, rotating him based on which direction he is moving
-
-//   moveRelative: (dx,dy) =>
-//     @transform
-//       x: @getX()+dx
-//       y: @getY()+dy
-//       angle: 360 * (Math.atan2(dy,dx)/(Math.PI*2))
-// ¶
-// Use d3's behaviors to make the player draggable
-
-// When he is dragged, move him the amount that the mouse moved (available in the global current user event: d3.event)
-// Setup dragging using d3's drag behaviour and bind dragMove to the on 'drag' event
-// Apply the drag behaviour to the player's svg element
-//   setupDragging: =>
-//     dragMove = =>
-//       @moveRelative(d3.event.dx, d3.event.dy)
-
-//     drag = d3.behavior.drag()
-//             .on('drag', dragMove)
-//     @el.call(drag)
