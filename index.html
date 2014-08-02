@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel='stylesheet' type='css' href='styles.css'> 
+    <link rel='stylesheet' type='css' href='styles.css'>
   </head>
   <body>
     <div class="scoreboard">
@@ -10,8 +10,23 @@
       <div class="current">Current score: <span>0</span></div>
       <div class="collisions">Collisions: <span>0</span></div>
     </div>
-    <script src="d3.js" charset="utf-8"></script>
-    <script src='vid.js'></script>
-    <script src='watchout.js'></script>
+    <div class="container"></div>
   </body>
+  <script src="d3.js" charset="utf-8"></script>
+  <script src='vid.js'></script>
+  <script src='Player.js'></script>
+  <script src='Enemy.js'></script>
+  <script src='watchout.js'></script>
+  <script type="text/javascript">
+    var axes = {};
+
+    axes.x = d3.scale.linear().domain([0,100]).range([0,1000]);
+    axes.y = d3.scale.linear().domain([0,100]).range([0,1000]);
+
+
+    var wo = new Watchout();
+
+    wo.play();
+
+  </script>
 </html>
