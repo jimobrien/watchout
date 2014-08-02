@@ -3,3 +3,12 @@
 /* Note: an asteroid image is included in this repo. 
 Feel free to use it if you like. */
 
+body {
+	background: #111;
+	color: #fafafa;
+}
+
+.enemy {
+	fill: #ddd;
+	background-image: url('data:image/svg+xml;utf8,../img/asteroid.svg');
+}

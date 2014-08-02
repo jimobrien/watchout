@@ -9,9 +9,8 @@
   <body>
     <div class="scoreboard">
       <!-- Modify the scoreboard when important events occur in your game! -->
-      <div class="high">High score: <span>0</span></div>
-      <div class="current">Current score: <span>0</span></div>
-      <div class="collisions">Collisions: <span>0</span></div>
+      <div class="high-container">High score: <span class="highscore">0</span></div>
+      <div class="current-container">Current score: <span class="currentscore">0</span></div>
     </div>
     <div class="container"></div>
   </body>
@@ -30,6 +29,7 @@
     var gameStats = {};
     gameStats.score = 0;
     gameStats.bestScore = 0;
+    gameStats.collisions = 0;
 
     var axes = {};
     axes.x = d3.scale.linear().domain([0,100]).range([0,gameOptions.width]);
@@ -40,14 +40,13 @@
                     .attr('height', gameOptions.height);
 
     var updateScore = function () {
-      d3.select('#current-score').text(gameStats.score.toString());
+      d3.select('.currentscore').text(gameStats.score.toString());
+
     };
 
     var updateBestScore = function () {
-      console.log('update score');
       gameStats.bestScore = Math.max(gameStats.bestScore, gameStats.score);
-      d3.select('#best-score').text(gameStats.bestScore.toString());
-      console.log(gameStats.bestScore);
+      d3.select('.highscore').text(gameStats.bestScore.toString());
     };
 
     var players = [];
@@ -96,8 +95,9 @@
 
     var onCollision = function() {
       updateBestScore();
+      
       gameStats.score = 0;
-      return updateScore();
+      updateScore();
     };
 
     var tweenWithCollisionDetection = function(endData) {
@@ -126,7 +126,7 @@
 
     enemies.transition()
              .duration(500)
-             .attr('r', 10)
+             .attr('r', function() { return Math.random() * 16 })
            .transition()
              .duration(2000)
              .tween('custom', tweenWithCollisionDetection);
@@ -136,11 +136,11 @@
     var gameTurn = function() {
       var newEnemyPositions;
       newEnemyPositions = createEnemies();
-      return render(newEnemyPositions);
+      render(newEnemyPositions);
     };
     var increaseScore = function() {
       gameStats.score += 1;
-      return updateScore();
+      updateScore();
     };
 
     gameTurn();
