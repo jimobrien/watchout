@@ -1,14 +1,14 @@
 /* your beautiful css styling goes here! */
 
-/* Note: an asteroid image is included in this repo. 
+/* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
 body {
-	background: #111;
+	background: #181C25;
 	color: #fafafa;
 }
 
 .enemy {
-	fill: #ddd;
-	background-image: url('data:image/svg+xml;utf8,../img/asteroid.svg');
+	height: 50px;
+  width: 50px;
 }
